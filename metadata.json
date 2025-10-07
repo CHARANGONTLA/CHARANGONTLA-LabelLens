@@ -1,0 +1,7 @@
+{
+  "name": "LabelLens",
+  "description": "An AI-powered tool to extract structured product details like name, batch number, manufacturing date, expiry date, MRP, and weight from images of product labels.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
