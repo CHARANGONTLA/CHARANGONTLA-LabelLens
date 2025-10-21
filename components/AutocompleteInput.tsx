@@ -1,28 +1,50 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 
-interface AutocompleteInputProps extends Omit<React.TextareaHTMLAttributes<HTMLTextAreaElement>, 'onChange'> {
-  suggestions: string[];
-  value: string;
-  onChange: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
-  onSuggestionSelect: (value: string) => void;
+// Define common props to avoid complex generic types
+interface CommonInputProps {
+  id?: string;
+  className?: string;
+  style?: React.CSSProperties;
+  placeholder?: string;
+  disabled?: boolean;
+  autoCapitalize?: string;
+  'aria-label'?: string;
+  'aria-required'?: boolean;
+  onFocus?: (event: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  onBlur?: (event: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
 }
 
-export const AutocompleteInput: React.FC<AutocompleteInputProps> = ({ suggestions, value, onChange, onSuggestionSelect, ...props }) => {
+
+interface AutocompleteInputProps extends CommonInputProps {
+  suggestions: string[];
+  value: string;
+  onChange: (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  onSuggestionSelect: (value: string) => void;
+  as?: 'input' | 'textarea';
+}
+
+export const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
+  suggestions,
+  value,
+  onChange,
+  onSuggestionSelect,
+  as = 'textarea',
+  ...props
+}) => {
   const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    // Autosize textarea
-    if (textareaRef.current) {
-        const textarea = textareaRef.current;
-        textarea.style.height = 'auto'; // Reset height
+    if (as === 'textarea' && inputRef.current) {
+        const textarea = inputRef.current;
+        textarea.style.height = 'auto';
         textarea.style.height = `${textarea.scrollHeight}px`;
         textarea.style.resize = 'none';
         textarea.style.overflowY = 'hidden';
     }
-  }, [value]);
+  }, [value, as]);
 
   useEffect(() => {
     if (value) {
@@ -32,7 +54,6 @@ export const AutocompleteInput: React.FC<AutocompleteInputProps> = ({ suggestion
       );
       setFilteredSuggestions(filtered);
     } else {
-      // Show all suggestions if input is empty but focused
       setFilteredSuggestions(suggestions);
     }
   }, [value, suggestions]);
@@ -55,7 +76,7 @@ export const AutocompleteInput: React.FC<AutocompleteInputProps> = ({ suggestion
     setShowSuggestions(false);
   };
   
-  const handleFocus = (e: React.FocusEvent<HTMLTextAreaElement>) => {
+  const handleFocus = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setShowSuggestions(true);
     if(props.onFocus) {
         props.onFocus(e);
@@ -64,17 +85,28 @@ export const AutocompleteInput: React.FC<AutocompleteInputProps> = ({ suggestion
 
   const hasVisibleSuggestions = showSuggestions && filteredSuggestions.length > 0;
 
+  const commonProps = {
+    value,
+    onChange,
+    onFocus: handleFocus,
+    autoComplete: "off",
+    ...props,
+  };
+
   return (
     <div ref={wrapperRef} className="relative w-full">
-      <textarea
-        ref={textareaRef}
-        rows={1}
-        value={value}
-        onChange={onChange}
-        onFocus={handleFocus}
-        autoComplete="off"
-        {...props}
-      />
+      {as === 'textarea' ? (
+        <textarea
+          ref={inputRef}
+          rows={1}
+          {...commonProps}
+        />
+      ) : (
+        <input
+          type="text"
+          {...commonProps}
+        />
+      )}
       {hasVisibleSuggestions && (
         <ul className="absolute z-10 w-full mt-1 max-h-48 overflow-y-auto bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg">
           {filteredSuggestions.map((suggestion, index) => (

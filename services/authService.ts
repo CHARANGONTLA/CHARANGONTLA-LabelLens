@@ -5,11 +5,45 @@
 // Anyone can view this code in their browser and see the email and password.
 // For real applications, always use a secure backend authentication service like Supabase or Firebase.
 
-import { ALLOWED_USERS } from './userDatabase';
+import { UserRole } from '../types';
 
 export interface User {
   email: string;
+  role: UserRole;
 }
+
+interface UserCredentials {
+    email: string;
+    password: string;
+    role: UserRole;
+}
+
+// To add or remove users, simply edit the array below.
+// The contents of the deleted userDatabase.ts have been moved here.
+const ALLOWED_USERS: UserCredentials[] = [
+  {
+    email: 'charangontla24@gmail.com',
+    password: '123456789',
+    role: 'employee',
+  },
+  {
+    email: 'satishgontla02@gmail.com',
+    password: '123456789',
+    role: 'employee',
+  },
+  {
+    email: 'satishdistributors@gmail.com',
+    password:  '9849019071',
+    role: 'admin',
+  },
+  
+  // Add more users here as needed
+  // {
+  //   email: 'anotheruser@example.com',
+  //   password: 'securepassword',
+  //   role: 'employee',
+  // },
+];
 
 /**
  * Simulates a sign-in process by checking credentials against a predefined list.
@@ -25,7 +59,7 @@ function signIn(email: string, password: string): Promise<User> {
       const user = ALLOWED_USERS.find(u => u.email.toLowerCase() === normalizedEmail);
 
       if (user && user.password === password) {
-        resolve({ email: user.email });
+        resolve({ email: user.email, role: user.role });
       } else {
         reject(new Error('Invalid email or password. Please try again.'));
       }

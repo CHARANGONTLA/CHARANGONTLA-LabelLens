@@ -23,9 +23,19 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const signIn = useCallback(async (email: string, password: string) => {
     const signedInUser = await authService.signIn(email, password);
-    setUser(signedInUser);
+    
+    // Create a new plain object to ensure no circular references are stored.
+    // This prevents errors if signedInUser is a complex object (e.g., from Firebase).
+    const serializableUser = {
+      email: signedInUser.email,
+      role: signedInUser.role,
+    };
+
+    // Store the clean, serializable object in both React state and sessionStorage.
+    setUser(serializableUser);
+
     try {
-      sessionStorage.setItem('user', JSON.stringify(signedInUser));
+      sessionStorage.setItem('user', JSON.stringify(serializableUser));
     } catch (error) {
       console.error("Could not save user to sessionStorage", error);
     }

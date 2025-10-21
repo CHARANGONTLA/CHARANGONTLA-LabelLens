@@ -165,8 +165,10 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({ onFilesSelected, d
     const droppedFiles = e.dataTransfer.files;
     if (droppedFiles && droppedFiles.length > 0) {
         const acceptedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
-        // FIX: Explicitly type `file` as `File` to resolve TS errors where it was inferred as `unknown`.
-        const imageFilesArray = Array.from(droppedFiles).filter((file: File) => acceptedTypes.includes(file.type));
+        // FIX: Used a type guard to ensure that only File objects are processed, resolving potential type inference issues.
+        const imageFilesArray = Array.from(droppedFiles).filter(
+            (file): file is File => file instanceof File && acceptedTypes.includes(file.type)
+        );
         
         if (imageFilesArray.length === 0) {
             alert('Please drop only image files (PNG, JPG, WEBP).');

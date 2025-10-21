@@ -22,3 +22,23 @@ export interface Toast {
   message: string;
   type: ToastType;
 }
+
+// New types for the Order System
+export type UserRole = 'employee' | 'admin';
+
+export interface OrderItem {
+  productName: string;
+  quantity: number;
+}
+
+export type OrderStatus = 'Pending' | 'Dispatched' | 'Delivered';
+
+export interface Order {
+  id: string; // Document ID from Firestore
+  createdAt: number; // Timestamp
+  employeeEmail: string;
+  outletName: string;
+  items: OrderItem[];
+  status: OrderStatus;
+  totalQuantity: number;
+}
